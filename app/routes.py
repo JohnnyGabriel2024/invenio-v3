@@ -1,4 +1,3 @@
-# VERSIÓN FINAL CORREGIDA
 from flask import request, redirect, render_template_string
 from datetime import datetime
 from app.db import query
@@ -6,6 +5,8 @@ from app.logica import confirmar_pedido
 
 
 def register_routes(app):
+
+    # ================= HOME =================
 
     @app.route("/")
     def index():
@@ -57,7 +58,6 @@ def register_routes(app):
   --card:#ffffff;
   --primary:#1976d2;
   --success:#2e7d32;
-  --danger:#c62828;
   --muted:#777;
 }
 
@@ -110,8 +110,6 @@ ul { list-style:none; padding:0; margin:0; }
 li { padding:.4rem 0; border-bottom:1px solid #eee; }
 
 .muted { color:var(--muted); }
-.in { color:var(--success); }
-.out { color:var(--danger); }
 </style>
 </head>
 
@@ -132,7 +130,7 @@ li { padding:.4rem 0; border-bottom:1px solid #eee; }
 </select>
 
 <select name="supplier_id">
-<option value="">— Proveedor (opcional) —</option>
+<option value="">Proveedor (opcional)</option>
 {% for s in proveedores %}
 <option value="{{ s[0] }}">{{ s[1] }}</option>
 {% endfor %}
@@ -143,7 +141,7 @@ li { padding:.4rem 0; border-bottom:1px solid #eee; }
 </form>
 </div>
 
-<!-- ================= Proveedores y Clientes ================= -->
+<!-- ================= Proveedores / Clientes ================= -->
 
 <div class="grid-2">
 
@@ -173,6 +171,23 @@ li { padding:.4rem 0; border-bottom:1px solid #eee; }
 </ul>
 </div>
 
+</div>
+
+<!-- ================= Categorías ================= -->
+
+<div class="section">
+<h3>Categorías</h3>
+
+<form method="post" action="/categories/create">
+<input name="name" placeholder="Nombre de la categoría" required>
+<button>Crear categoría</button>
+</form>
+
+<ul>
+{% for c in categorias %}
+<li>{{ c[1] }}</li>
+{% endfor %}
+</ul>
 </div>
 
 <!-- ================= Productos ================= -->
@@ -251,11 +266,10 @@ li { padding:.4rem 0; border-bottom:1px solid #eee; }
 <strong>{{ m[1] }}</strong>
 <span class="muted">({{ m[2] }})</span>
 —
-<span class="{{ 'in' if m[3]=='entrada' else 'out' }}">{{ m[3] }}</span>
-|
-Cantidad: {{ m[4] }}
+{{ m[3] }} |
+{{ m[4] }}
 {% if m[6] %}
-| Proveedor: {{ m[6] }}
+| {{ m[6] }}
 {% endif %}
 |
 <span class="muted">{{ m[5] }}</span>
@@ -288,6 +302,15 @@ Cantidad: {{ m[4] }}
     @app.route("/clients/create", methods=["POST"])
     def crear_cliente():
         query("INSERT INTO clients (name) VALUES (?)", (request.form["name"],))
+        return redirect("/")
+
+    # ================= Categorías =================
+
+    @app.route("/categories/create", methods=["POST"])
+    def crear_categoria():
+        name = request.form.get("name")
+        if name:
+            query("INSERT INTO categories (name) VALUES (?)", (name,))
         return redirect("/")
 
     # ================= Productos =================
